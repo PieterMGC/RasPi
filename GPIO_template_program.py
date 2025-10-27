@@ -5,7 +5,8 @@ def setup():
     GPIO.setmode(GPIO.BCM)
 
 def loop():
-    pass
+    while True:
+        pass
 
 def destroy():
     GPIO.cleanup()

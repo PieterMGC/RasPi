@@ -1,23 +1,13 @@
-#work with joystick
-
 import RPi.GPIO as GPIO
-import ADC0834
 from time import sleep
-
-buttonPin = 21
 
 def setup():
     GPIO.setmode(GPIO.BCM)
-    ADC0834.setup()
-    GPIO.setup(buttonPin, GPIO.IN, pull_up_down=GPIO.PUD_UP)
+    GPIO.setup(17, GPIO.OUT)
 
 def loop():
     while True:
-        analogValX = ADC0834.getResult(0)
-        analogValY = ADC0834.getResult(1)
-        buttonState = GPIO.input(buttonPin)
-        print('X val = ', analogValX, 'Y val = ', analogValY, 'Button state = ', buttonState)
-        sleep(.5)
+        GPIO.output(17, True)
 
 def destroy():
     GPIO.cleanup()
