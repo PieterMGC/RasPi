@@ -3,7 +3,7 @@
 import RPi.GPIO as GPIO
 import dht11
 from time import sleep
-
+GPIO.cleanup()
 myDHT = 0
 
 
