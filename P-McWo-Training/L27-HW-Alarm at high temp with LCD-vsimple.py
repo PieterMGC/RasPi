@@ -11,28 +11,38 @@ dht = None
 def setup():
     pass
 
-def loop():
-    while True:
-        t_c = dht.temperature
-        if t_c is not None:
-            print(f"T: {t_c:.1f}°C")
-        sleep(10)          
+def read_temp():
+    t_c = dht.temperature
+    if t_c is not None:
+        print(f"T: {t_c:.1f}°C")
+        return t_c
+    else:
+        print("Sensor reading failed, retrying...", flush=True)
+         
             
 
-def destroy():
-    global dth
+def destroy(signum=None, frame=None):
+    global dht
     if dht is not None:
-        dth.exit()
+        dht.exit()
     print('Program Stopped')
+    sys.exit()
 
 
 if __name__ == '__main__':     #Program start from here
-    print ('Program is starting...')
+    print ('Program is starting..., Press Crtl+C to stop')
     dht = adafruit_dht.DHT11(tempPIN)
+    signal.signal(signal.SIGINT, destroy)   # Ctrl+C
+    signal.signal(signal.SIGTERM, destroy)  # Service stop
     try:
-        loop()
-    except KeyboardInterrupt:  # When 'Ctrl+C' is pressed, the child program destroy() will be  executed.
+        while True:
+            temp = read_temp()
+            print('temp = ', temp)
+            sleep(10)
+    except RuntimeError as e:
+        # Komt vaak voor, sensor is even niet leesbaar
+        print(f"Reading error: {e}", flush=True)
+    except Exception as e:
+        # Andere fouten → afsluiten
+        print(f"Fatal error: {e}", flush=True)
         destroy()
-    finally:
-        print('Everything Cleaned')
-        sys.exit()
