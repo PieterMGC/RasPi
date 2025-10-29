@@ -39,7 +39,7 @@ try:
         except RuntimeError as e:
             # normal transient errors from DHTs
             print(f"Retrying: {e}")
-        time.sleep(10)
+        time.sleep(15)
 except Exception as e:
     # Any unexpected error -> still release the pin
     print(f"Fatal error: {e}")
