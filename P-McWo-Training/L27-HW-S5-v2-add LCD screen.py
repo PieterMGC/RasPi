@@ -1,31 +1,40 @@
-import adafruit_dht
-import board
-import sys
-import signal
-import RPi.GPIO as GPIO
-from time import monotonic
-import ADC0834
-import LCD1602
+import adafruit_dht #for temperature sensor
+import board #for adafruit_dht
+import sys #for cleaning
+import signal #for Crtl+C reading
+import RPi.GPIO as GPIO #for GPIO
+import ADC0834 #for analog to digital conversion chip
+import LCD1602 #for LCD
 
-tempPIN = board.D4
+#GPIO pin
+tempPIN = board.D4		#DHT11 data pin - GPIO4 - Use board for adafruit_dht
+buttonPIN = 21			#Button Pin - GPIO21
+buzzPin = 13			#Buzzer Pin - GPIO13
+
+#Globals
 dht = None
 _cleaned = False
-buttonPIN = 21
 programState = 0
-setTemp = 25
-buzzPin = 13
 
-GPIO.setmode(GPIO.BCM)
-GPIO.setup(buttonPIN, GPIO.IN,pull_up_down=GPIO.PUD_UP)
-ADC0834.setup()
+#GPIO setup
+GPIO.setmode(GPIO.BCM) #Set GPIO mode to BCM
+GPIO.setup(buttonPIN, GPIO.IN,pull_up_down=GPIO.PUD_UP) #button with internal pull up resistor
 GPIO.setup(buzzPin, GPIO.OUT)
+ 
+ADC0834.setup() #ADC0834 setup
+
+#buzzer PWM setup
 buzzPWM = GPIO.PWM(buzzPin, 200)
-LCD1602.init(0x27, 1)
+buzzPWM.start(0)
+
+LCD1602.init(0x27, 1) #LCD setup, 27 is channel
 
 def map_255_to_50(value):
+    """convert 255 to 50"""
     return (value/255)*50
 
 def read_temp():
+    """read temperature via adafruit DHT11 sensor"""
     global dht
     try:
         t_c = dht.temperature
@@ -50,10 +59,15 @@ def toggle_state():
         print("\n→ Switched to TEMPERATURE MODE\n", flush=True)
 
 def readPot():
-    potVAL = ADC0834.getResult(0)
-    return potVAL
+    """read value of potentio meter"""
+    try:
+        return ADC0834.getResult(0)
+    except Exception as e:
+        print(f"[ADC] read error: {e}", flush=True)
+        return 0
 
 def destroy(SIGINT=None, SIGTERM=None):
+    """Cleanup on exit"""
     global dht, _cleaned
     if _cleaned:
         return
@@ -70,14 +84,14 @@ def destroy(SIGINT=None, SIGTERM=None):
 
 if __name__ == '__main__':
     print('Program is starting..., Press Ctrl+C to stop')
-    signal.signal(signal.SIGINT, destroy)
-    signal.signal(signal.SIGTERM, destroy)
-    dht = adafruit_dht.DHT11(tempPIN)
-    setTemp = round(map_255_to_50(readPot()), 2)
+    signal.signal(signal.SIGINT, destroy) #read Ctrl+C, and run destroy()
+    signal.signal(signal.SIGTERM, destroy) #run destroy on error
+    dht = adafruit_dht.DHT11(tempPIN) #read temperature from DHT11 sesnor
+    setTemp = round(map_255_to_50(readPot()), 2) #read, convert and set alarm temperature
+    print(f"Alarm Temp: {setTemp}°C", flush=True)
     try:
         while True:
             if programState == 0:
-                start = monotonic()
                 temp = read_temp()
                 if temp is not None:
                     print(f"T: {temp:.1f}C", flush=True)
@@ -85,9 +99,9 @@ if __name__ == '__main__':
                     LCD1602.write(0, 0, f"Actual T: {temp:.1f}C")
                     LCD1602.write(0, 1, f"Alarm T: {setTemp}C")
                     if temp > setTemp:
-                        buzzPWM.start(10)
+                        buzzPWM.ChangeDutyCycle(10)
                     else:
-                        buzzPWM.start(0)
+                        buzzPWM.ChangeDutyCycle(0)
                 else:
                     print("No valid reading.", flush=True)
                     LCD1602.clear()
@@ -112,4 +126,8 @@ if __name__ == '__main__':
                     toggle_state()
     except Exception as e:
         print(f"Program stopped by: {e}", flush=True)
-        destroy()    
+        destroy()
+    finally:
+        destroy()
+        # Use sys.exit here to give systemd/terminal a proper exit code
+        sys.exit(0)
