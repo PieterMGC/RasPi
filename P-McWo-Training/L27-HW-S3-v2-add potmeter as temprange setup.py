@@ -3,18 +3,22 @@ import board
 import sys
 import signal
 import RPi.GPIO as GPIO
-from threading import Event
 from time import monotonic
+import ADC0834
 
 tempPIN = board.D4
 dht = None
 _cleaned = False
 buttonPIN = 21
 programState = 0
-state_event = Event()
+setTemp = 25
 
 GPIO.setmode(GPIO.BCM)
 GPIO.setup(buttonPIN, GPIO.IN,pull_up_down=GPIO.PUD_UP)
+ADC0834.setup()
+
+def map_255_to_50(value):
+    return (value/255)*50
 
 def read_temp():
     global dht
@@ -30,11 +34,20 @@ def read_temp():
         print(f"Reading error: {e}", flush=True)
         return None
 
-def button_pressed(channel):
+def toggle_state():
+    """Switch between normal and program mode."""
     global programState
-    programState = 1 - programState
-    state_event.set() # <-- interrupt any waiting/sleep right now
-    
+    if programState == 0:
+        programState = 1
+        print("\n→ Switched to PROGRAM MODE\n", flush=True)
+    else:
+        programState = 0
+        print("\n→ Switched to TEMPERATURE MODE\n", flush=True)
+
+def readPot():
+    potVAL = ADC0834.getResult(0)
+    return potVAL
+
 def destroy(SIGINT=None, SIGTERM=None):
     global dht, _cleaned
     if _cleaned:
@@ -54,23 +67,32 @@ if __name__ == '__main__':
     signal.signal(signal.SIGINT, destroy)
     signal.signal(signal.SIGTERM, destroy)
     dht = adafruit_dht.DHT11(tempPIN)
-    GPIO.add_event_detect(buttonPIN, GPIO.RISING, callback=button_pressed, bouncetime=200)
     try:
         while True:
-            while programState == 0:
-                t0 = monotonic()
+            if programState == 0:
+                start = monotonic()
                 temp = read_temp()
                 if temp is not None:
                     print(f"T: {temp:.1f}°C", flush=True)
-                # Wait for either: button press (event set) OR timeout (next read)
-                state_event.wait(timeout=max(0, 10 - (monotonic() - t0)))
-                state_event.clear()   # clear for the next cycle and react to state change immediately
+                else:
+                    print("No valid reading.", flush=True)
+                # Wait for button press (FALLING edge) or timeout
+                # Return value: None if timeout, or channel number if pressed
+                edge = GPIO.wait_for_edge(buttonPIN, GPIO.FALLING, timeout=int(10 * 1000))
+                if edge is not None:
+                    toggle_state()
+
             else:
-                print("Program mode")
-                # Sleep in small chunks so Ctrl+C remains responsive; event breaks immediately.
-                state_event.wait(timeout=0.5)
-                if state_event.is_set():
-                    state_event.clear()  # consumed state change; loop checks programState again
+                print("Set the temperature alarm with Potmeter: ", flush=True)
+                setTemp = round(map_255_to_50(readPot()), 2)
+                print(f"Confirm {setTemp}°C by pressing the button.", flush=True)
+                # Wait for button press (FALLING edge) or timeout
+                # Return value: None if timeout, or channel number if pressed
+                edge = GPIO.wait_for_edge(buttonPIN, GPIO.FALLING, timeout=int(1 * 1000))
+                if edge is not None:
+                    toggle_state()
     except Exception as e:
         print(f"Program stopped by: {e}", flush=True)
         destroy()    
+
+
