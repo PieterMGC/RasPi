@@ -14,7 +14,6 @@ def setup():
     GPIO.setup(cols,GPIO.IN,pull_up_down=GPIO.PUD_DOWN)
 
 def loop():
-    global prevRead
     while True:
         for i in range(4):
             for y in range(4):

@@ -6,9 +6,7 @@ def setup():
 
 def loop():
     while True:
-        for i in range(4):
-            print(i)
-            sleep(1)
+
 
 def destroy():
     GPIO.cleanup()
