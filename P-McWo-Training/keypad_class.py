@@ -36,8 +36,20 @@ class KeypadReader:
             if value != None and value != self.retChar:
                 self.output += str(value)
             elif value == 'D':
-                print(self.output)
+                msg = self.output
                 self.output = ""
+                print(msg)
+    
+    def return_sequence(self):
+        while True:
+            value = self.read_keypad()
+            if value != None and value != self.retChar:
+                self.output += str(value)
+            elif value == 'D':
+                msg = self.output
+                self.output = ""
+                print(msg)
+                return msg
 
     def destroy(self):
         GPIO.cleanup()
