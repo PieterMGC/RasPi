@@ -38,14 +38,16 @@ def alarm():
             LCD1602.write(0,1,'         ')
 
 def destroy():
+    motionThread.join()
+    readThread.join()
     GPIO.cleanup()
     LCD1602.clear()
     print('Program Stopped')
     sys.exit()
 
-readThread = threading.Thread(target=detect_motion,)
-readThread.deamon=True
-readThread.start()
+motionThread = threading.Thread(target=detect_motion,)
+motionThread.deamon=True
+motionThread.start()
 
 readThread = threading.Thread(target=read_kp,)
 readThread.deamon=True
