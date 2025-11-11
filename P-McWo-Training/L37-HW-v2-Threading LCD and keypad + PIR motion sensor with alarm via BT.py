@@ -1,5 +1,6 @@
 #add motion sensor to make an alarm
 #while the program is running, also thread for user input
+#add alarm via BT speaker
 
 import RPi.GPIO as GPIO
 import LCD1602
@@ -87,4 +88,5 @@ try:
 
 except KeyboardInterrupt:
     destroy()
+
 
