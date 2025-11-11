@@ -20,9 +20,9 @@ GPIO.setup(motionPIN, GPIO.IN)
 
 def read_kp():
     global myString
-    while True:
+    while myString != '*':
         myString=myPad.return_sequence()
-        sleep(.1)
+        sleep(.5)
 
 def detect_motion():
     global motion
@@ -44,6 +44,12 @@ def new_pw():
             sleep(2)
             LCD1602.clear()
 
+def destroy():
+    GPIO.cleanup()
+    LCD1602.clear()
+    print('Program Stopped')
+    sys.exit()
+
 #readThread = threading.Thread(target=new_pw,)
 #readThread.deamon=True
 #readThread.start()
@@ -57,7 +63,7 @@ readThread.deamon=True
 readThread.start()
 
 try:
-    while True:
+    while myString != '*':
         CMD = myString
         if CMD == 'A'+ pwd:
             LCD1602.write(0,0,'Armed   ')
@@ -73,14 +79,15 @@ try:
         elif CMD == 'C' +  pwd:
             LCD1602.write(0,0,'New PWD?')
             while myString == 'C' + pwd:
-                pass
+                if motion == 1 and armed == 1:
+                    LCD1602.write(0,1,'ALARM!!  ')
+                else:
+                    LCD1602.write(0,1,'         ')
             pwd=myString
             LCD1602.clear()
             LCD1602.write(0,0,'New PWD= '+pwd)
             sleep(2)
             LCD1602.clear()
+    destroy()
 except KeyboardInterrupt:
-    GPIO.cleanup()
-    LCD1602.clear()
-    print('Program Stopped')
-    sys.exit()
+    destroy()
