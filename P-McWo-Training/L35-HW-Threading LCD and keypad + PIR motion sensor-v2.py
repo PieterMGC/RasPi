@@ -43,10 +43,6 @@ def destroy():
     print('Program Stopped')
     sys.exit()
 
-#readThread = threading.Thread(target=new_pw,)
-#readThread.deamon=True
-#readThread.start()
-
 readThread = threading.Thread(target=detect_motion,)
 readThread.deamon=True
 readThread.start()
@@ -77,6 +73,7 @@ try:
         else:
             LCD1602.write(0,0,'UnArmed ')
             LCD1602.write(0,1,'         ')
+        sleep(.1)
     destroy()
 
 except KeyboardInterrupt:
