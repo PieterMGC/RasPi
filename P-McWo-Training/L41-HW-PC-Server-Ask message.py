@@ -1,0 +1,26 @@
+import socket
+from datetime import datetime, timezone
+
+bufferSize = 1024
+serverPort = 2222
+serverIP = "192.168.86.42"
+
+msgFromServer = "Hello client, I am your server."
+bytesToSend = msgFromServer.encode('utf-8')
+
+RPISocket = socket.socket(socket.AF_INET,socket.SOCK_DGRAM)
+RPISocket.bind((serverIP,serverPort))
+print("Server is up and listening...")
+while True:
+    message, address = RPISocket.recvfrom(bufferSize)
+    message = message.decode('utf-8')
+    cmd = input('Read msg? (Y/N): ')
+    if cmd == "Y":
+        timeStamp = datetime.now()
+        print(timeStamp)
+        print(message)
+        print('Client Adress: ',address[0],"\n")
+        #RPISocket.sendto(bytesToSend,address)
+    elif cmd != "Y":
+        print('Nothing read.')
+        #RPISocket.sendto(bytesToSend, address)

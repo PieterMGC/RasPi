@@ -2,7 +2,7 @@ import socket
 
 msgFromClient='Hello Server, from your client.'
 bytesToSend = msgFromClient.encode('utf-8')
-serverAddress=('192.168.86.42', 2222)
+serverAddress=('192.168.86.35', 2222)
 bufferSize=1024
 UDPClient = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 while True:
