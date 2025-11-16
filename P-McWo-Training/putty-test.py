@@ -1,6 +1,5 @@
 #add motion sensor to make an alarm
 #while the program is running, also thread for user input
-#add alarm via BT speaker
 
 import RPi.GPIO as GPIO
 import LCD1602
@@ -8,7 +7,6 @@ from keypad_class import KeypadReader
 from time import sleep
 import threading
 import sys
-from pygame import mixer
 
 myPad = KeypadReader()
 LCD1602.init(0x27,1)
@@ -16,9 +14,6 @@ myString = ''
 pwd = '1234'
 motionPIN = 7
 armed = 0
-
-mixer.init()
-mixer.music.load('alarm.mp3')
 
 GPIO.setmode(GPIO.BOARD)
 GPIO.setup(motionPIN, GPIO.IN)
@@ -42,8 +37,6 @@ def alarm():
     if armed == 1:
         if motion == 1:
             LCD1602.write(0,1,'ALARM!!  ')
-            mixer.music.play()
-            sleep(10)
         else:
             LCD1602.write(0,1,'         ')
 
@@ -94,5 +87,4 @@ try:
 
 except KeyboardInterrupt:
     destroy()
-
 
