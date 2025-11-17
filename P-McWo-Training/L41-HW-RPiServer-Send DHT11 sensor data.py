@@ -1,5 +1,5 @@
 #Send the DHT11 sensor data to the PC
-#determine who is client and who is server
+#RasPi is client, PC is server
 
 import socket
 import sys, signal
@@ -18,11 +18,11 @@ try:
         t = str(t)
         t = t.encode('utf-8')
         UDPClient.sendto(t, serverAddress)
-        data, address = UDPClient.recvfrom(bufferSize)
-        data = data.decode('utf-8')
-        print('Data from Server: ', data)
-        print('Server IP address: ', address[0])
-        print('Server port: ', address[1])
+        #data, address = UDPClient.recvfrom(bufferSize)
+        #data = data.decode('utf-8')
+        #print('Data from Server: ', data)
+        #print('Server IP address: ', address[0])
+        #print('Server port: ', address[1])
         sleep(1)
 finally:
     # Also release on normal interpreter shutdown
