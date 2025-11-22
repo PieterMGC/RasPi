@@ -41,7 +41,6 @@ while True:
         cv2.circle(im,cent,r,c_color,c_thick)
         cv2.imshow("Camera", im)
     print (count)
-    print(im[0,0])
     fps = count
     if cv2.waitKey(1) == ord('q'):
         break
