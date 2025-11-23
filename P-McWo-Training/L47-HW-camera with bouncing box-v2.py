@@ -28,14 +28,18 @@ rect_low_right = (x+box_w, y+box_h)
 horizontal = random.choice([1,-1])
 vertical = random.choice([1,-1])
 
-while True:
-    im = picam.capture_array()
+def Direction():
+    global horizontal, vertical, x, y
     if x + box_w == res_w - 1 or x == 0:
         horizontal = horizontal * (-1)
     if y + box_h == res_h - 1 or y == 0:
         vertical = vertical * (-1)
     x += horizontal
-    y += vertical
+    y += vertical    
+
+while True:
+    im = picam.capture_array()
+    Direction()
     rect_up_left = (x, y)
     rect_low_right = (x + box_w, y + box_h)
     cv2.rectangle(im, rect_up_left, rect_low_right, (255, 0, 0), 5)
