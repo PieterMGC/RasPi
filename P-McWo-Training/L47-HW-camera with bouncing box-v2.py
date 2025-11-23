@@ -1,4 +1,5 @@
 #create a bouncing box in the frame
+#optimise by just changing direction step = step*-1
 import cv2
 print(cv2.__version__)
 import time
@@ -23,52 +24,18 @@ y = random.randint(0, res_h-box_h)
 
 rect_up_left = (x,y)
 rect_low_right = (x+box_w, y+box_h)
-right_edge = random.choice([0,1])
-bottom_edge = random.choice([0,1])
 
-def down():
-    global y
-    y += 1
-def up():
-    global y
-    y -= 1
-def left():
-    global x
-    x -=1
-def right():
-    global x
-    x +=1
-
-def Horizontal():
-    global x, right_edge
-    if x + box_w < res_w - 1 and right_edge == 0:
-        right()
-    elif x + box_w == res_w - 1:
-        left()
-        right_edge = 1
-    elif x > 0 and right_edge == 1:
-        left()
-    elif x == 0:
-        right()
-        right_edge = 0
-
-def Vertical():
-    global y, bottom_edge
-    if y + box_h < res_h - 1 and bottom_edge == 0:
-        down()
-    elif y + box_h == res_h - 1:
-        up()
-        bottom_edge = 1
-    elif y > 0 and bottom_edge == 1:
-        up()
-    elif y == 0:
-        down()
-        bottom_edge = 0
+horizontal = random.choice([1,-1])
+vertical = random.choice([1,-1])
 
 while True:
     im = picam.capture_array()
-    Horizontal()
-    Vertical()
+    if x + box_w == res_w - 1 or x == 0:
+        horizontal = horizontal * (-1)
+    if y + box_h == res_h - 1 or y == 0:
+        vertical = vertical * (-1)
+    x += horizontal
+    y += vertical
     rect_up_left = (x, y)
     rect_low_right = (x + box_w, y + box_h)
     cv2.rectangle(im, rect_up_left, rect_low_right, (255, 0, 0), 5)
