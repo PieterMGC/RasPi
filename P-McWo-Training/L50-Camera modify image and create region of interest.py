@@ -20,3 +20,4 @@ picam.stop()
 picam.close()
 cv2.destroyAllWindows()
 print("All is closed")
+
