@@ -1,3 +1,5 @@
+
+
 import cv2
 print(cv2.__version__)
 import time
@@ -15,8 +17,11 @@ picam.configure("preview")
 picam.start()
 
 while True:
-    frame = picam.capture_array()
-    cv2.imshow("Camera", frame)
+    im = picam.capture_array()
+    for x in range(displ_h-1):
+        for y in range(displ_w-1):
+            im[x][y][0] = 0
+    cv2.imshow("Camera", im)
     if cv2.waitKey(1) == ord('q'):
         break
 picam.stop()
