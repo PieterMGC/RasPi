@@ -21,29 +21,8 @@ PAN = 1
 PAN_MIN, PAN_MAX = 40, 140
 TILT_MIN, TILT_MAX = 60, 120
 
-def TrackHL(val):
-    global hue_low
-    hue_low = val
-    
-def TrackHH(val):
-    global hue_high
-    hue_high = val
-    
-def TrackSL(val):
-    global sat_low
-    sat_low = val
-    
-def TrackSH(val):
-    global sat_high
-    sat_high = val
-    
-def TrackVL(val):
-    global val_low
-    val_low = val
-    
-def TrackVH(val):
-    global val_high
-    val_high = val
+def nothing(_): 
+    pass
 
 def goto(pan_angle, tilt_angle, pause=0.1):
     kit.servo[PAN].angle = pan_angle
@@ -59,24 +38,35 @@ picam.configure("preview")
 picam.start()
 
 cv2.namedWindow('My trackbars')
-cv2.createTrackbar('hue_low','My trackbars',25,179,TrackHL)
-cv2.createTrackbar('hue_high','My trackbars',40,179,TrackHH)
-cv2.createTrackbar('sat_low','My trackbars',100,255,TrackSL)
-cv2.createTrackbar('sat_high','My trackbars',255,255,TrackSH)
-cv2.createTrackbar('value_low','My trackbars',100,255,TrackVL)
-cv2.createTrackbar('value_high','My trackbars',255,255,TrackVH)
+cv2.createTrackbar('hue_low','My trackbars',20,179,nothing)
+cv2.createTrackbar('hue_high','My trackbars',100,179,nothing)
+cv2.createTrackbar('sat_low','My trackbars',100,255,nothing)
+cv2.createTrackbar('sat_high','My trackbars',255,255,nothing)
+cv2.createTrackbar('value_low','My trackbars',100,255,nothing)
+cv2.createTrackbar('value_high','My trackbars',255,255,nothing)
 pan_angle = 90
 tilt_angle = 90
 goto(pan_angle, tilt_angle)
+kernel = np.ones((5, 5), np.uint8)
 
 while True:
     frame = picam.capture_array()
     frame = cv2.flip(frame, 0)
-    frame_HSV = cv2.cvtColor(frame,cv2.COLOR_BGR2HSV)
-    lower_bound = np.array([hue_low,sat_low,val_low])
-    upper_bound = np.array([hue_high,sat_high,val_high])
-    my_mask = cv2.inRange(frame_HSV,lower_bound,upper_bound)
-    contours, junk = cv2.findContours(my_mask,cv2.RETR_EXTERNAL,cv2.CHAIN_APPROX_SIMPLE)
+    frame_blur = cv2.GaussianBlur(frame, (5, 5), 0)
+    frame_HSV = cv2.cvtColor(frame_blur,cv2.COLOR_RGB2HSV)
+    hue_low  = cv2.getTrackbarPos("hue_low",  "My trackbars")
+    hue_high = cv2.getTrackbarPos("hue_high", "My trackbars")
+    sat_low  = cv2.getTrackbarPos("sat_low",  "My trackbars")
+    sat_high = cv2.getTrackbarPos("sat_high", "My trackbars")
+    val_low  = cv2.getTrackbarPos("value_low",  "My trackbars")
+    val_high = cv2.getTrackbarPos("value_high", "My trackbars")
+    #print(hue_low, hue_high, sat_low, sat_high, val_low, val_high)
+    lower = np.array([hue_low,  sat_low,  val_low], dtype=np.uint8)
+    upper = np.array([hue_high, sat_high, val_high], dtype=np.uint8)
+    mask = cv2.inRange(frame_HSV,lower,upper)
+    mask = cv2.morphologyEx(mask, cv2.MORPH_OPEN, kernel, iterations=1)
+    mask = cv2.morphologyEx(mask, cv2.MORPH_CLOSE, kernel, iterations=1)
+    contours, junk = cv2.findContours(mask,cv2.RETR_EXTERNAL,cv2.CHAIN_APPROX_SIMPLE)
     
     if len(contours) > 0:
         contours = sorted(contours, key=lambda x:cv2.contourArea(x), reverse=True)
