@@ -1,6 +1,6 @@
 import cv2
 print(cv2.__version__)
-import time
+print("Optimized:", cv2.useOptimized())
 from picamera2 import Picamera2
 
 displ_w = 1280
@@ -16,6 +16,7 @@ picam.start()
 
 while True:
     frame = picam.capture_array()
+    frame = cv2.flip(frame, -1)
     cv2.imshow("Camera", frame)
     if cv2.waitKey(1) == ord('q'):
         break
