@@ -19,21 +19,22 @@ font = cv2.FONT_HERSHEY_SIMPLEX
 height = 1.5
 myColor = (0,0,255)
 weight = 3
-
-while True:
-    count = 0
-    start = time.time()
-    while time.time() - start < 1:
-        im = picam.capture_array()
-        cv2.putText(im,'FPS: ' + str(fps),pos,font,height,myColor,weight)
-        count += 1
-        cv2.imshow("Camera", im)
-    print (count)
-    fps = count
-    if cv2.waitKey(1) == ord('q'):
-        break
-picam.stop()
-picam.close()
-cv2.destroyAllWindows()
-print("All is closed")
+try:
+    while True:
+        count = 0
+        start = time.time()
+        while time.time() - start < 1:
+            im = picam.capture_array()
+            cv2.putText(im,'FPS: ' + str(fps),pos,font,height,myColor,weight)
+            count += 1
+            cv2.imshow("Camera", im)
+        print (count)
+        fps = count
+        if (cv2.waitKey(1) & 0xFF) == ord('q'):
+            break
+finally:
+    picam.stop()
+    picam.close()
+    cv2.destroyAllWindows()
+    print("All is closed")
 
