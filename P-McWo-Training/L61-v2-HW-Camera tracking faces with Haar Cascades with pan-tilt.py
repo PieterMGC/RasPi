@@ -48,8 +48,8 @@ def setup_pan_tilt() -> None:
     goto(pan_angle, tilt_angle)
     
 def goto(pan_angle, tilt_angle, pause=0):
-    kit.servo[PAN].angle = pan_angle
-    kit.servo[TILT].angle = tilt_angle
+    kit.servo[PAN].angle = int(pan_angle)
+    kit.servo[TILT].angle = int(tilt_angle)
     sleep(pause)
 
 def detect_face(frame_rgb, face_cascade, scale = DETECT_SCALE):
