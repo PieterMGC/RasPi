@@ -3,7 +3,7 @@ from picamera2 import Picamera2
 from adafruit_servokit import ServoKit
 from time import sleep
 
-width, height, fps = 640, 360, 30
+width, height, fps = 1280, 720, 30
 
 DETECT_SCALE = 0.5
 FACE_XML = "./haar/haarcascade_frontalface_default.xml"
@@ -47,7 +47,7 @@ def setup_pan_tilt() -> None:
     kit.servo[PAN].set_pulse_width_range(500, 2500)  # pan
     goto(pan_angle, tilt_angle)
     
-def goto(pan_angle, tilt_angle, pause=0.1):
+def goto(pan_angle, tilt_angle, pause=0):
     kit.servo[PAN].angle = pan_angle
     kit.servo[TILT].angle = tilt_angle
     sleep(pause)
@@ -66,19 +66,24 @@ def draw_face(frame_rgb, faces) -> None:
     for (x, y, w, h) in faces:
         cv2.rectangle(frame_rgb, (x, y), (x + w, y + h), (255, 0, 0), 2)
         
-def calculate_pantilt_angle(faces):
+def calculate_pantilt_angle(faces, pan_angle, tilt_angle):
     for (x, y, w, h) in faces:
         error_w = (x+w/2)-width/2
         error_h = (y+h/2)-height/2
-        if abs(error_w) > 25 and (pan_angle < PAN_MAX or pan_angle > PAN_MIN):
-            pan_angle += error_w/70
-        if abs(error_h) > 25 and (tilt_angle < TILT_MAX or tilt_angle > TILT_MIN):
-            tilt_angle += error_h/70
+        if abs(error_w) > 25:
+            pan_angle += error_w / 70
+        if abs(error_h) > 25:
+            tilt_angle += error_h / 70
+    # Clamp naar veilige grenzen
+    pan_angle = max(PAN_MIN, min(PAN_MAX, pan_angle))
+    tilt_angle = max(TILT_MIN, min(TILT_MAX, tilt_angle))
     return pan_angle, tilt_angle
     
 def run_preview(picam: Picamera2, face_cascade, window_name: str = "Camera", flip: bool = True, detect: bool = True, track: bool = True) -> None:
     cv2.namedWindow(window_name, cv2.WINDOW_NORMAL)
-
+    pan_angle = 90
+    tilt_angle = 90
+    last_faces = []
     while True:
         frame = picam.capture_array()
 
@@ -88,8 +93,8 @@ def run_preview(picam: Picamera2, face_cascade, window_name: str = "Camera", fli
             last_faces = detect_face(frame, face_cascade, scale=DETECT_SCALE)
             draw_face(frame, last_faces)
         if track and len(last_faces) > 0:    
-            pan_angle, tilt_angle = calculate_pantilt_angle(last_faces)
-            goto(pan_angle, titl_angle)
+            pan_angle, tilt_angle = calculate_pantilt_angle(last_faces, pan_angle, tilt_angle)
+            goto(pan_angle, tilt_angle)
 
         cv2.imshow(window_name, frame)
         
@@ -120,8 +125,7 @@ def main() -> None:
     face_cascade = setup_haar()
     setup_pan_tilt()
 
-    width, height, fps = 640, 360, 30
-    pan_angle = 90
+
 
     picam = setup_camera(width, height, fps)
 
