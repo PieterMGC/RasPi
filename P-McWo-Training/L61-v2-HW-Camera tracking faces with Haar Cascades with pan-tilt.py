@@ -67,13 +67,14 @@ def draw_face(frame_rgb, faces) -> None:
         cv2.rectangle(frame_rgb, (x, y), (x + w, y + h), (255, 0, 0), 2)
         
 def calculate_pantilt_angle(faces, pan_angle, tilt_angle):
-    for (x, y, w, h) in faces:
-        error_w = (x+w/2)-width/2
-        error_h = (y+h/2)-height/2
-        if abs(error_w) > 25:
-            pan_angle += error_w / 70
-        if abs(error_h) > 25:
-            tilt_angle += error_h / 70
+    faces = sorted(faces, key=lambda f: f[2]*f[3], reverse=True)
+    (x,y,w,h) = faces[0]
+    error_w = (x+w/2)-width/2
+    error_h = (y+h/2)-height/2
+    if abs(error_w) > 25:
+        pan_angle += error_w / 70
+    if abs(error_h) > 25:
+        tilt_angle += error_h / 70
     # Clamp naar veilige grenzen
     pan_angle = max(PAN_MIN, min(PAN_MAX, pan_angle))
     tilt_angle = max(TILT_MIN, min(TILT_MAX, tilt_angle))
@@ -88,7 +89,7 @@ def run_preview(picam: Picamera2, face_cascade, window_name: str = "Camera", fli
         frame = picam.capture_array()
 
         if flip:
-            frame = cv2.flip(frame, -1)
+            frame = cv2.flip(frame, 0)
         if detect:
             last_faces = detect_face(frame, face_cascade, scale=DETECT_SCALE)
             draw_face(frame, last_faces)
