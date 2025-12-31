@@ -5,6 +5,8 @@ from time import sleep
 touch_pin = 21
 count = 0
 prev_cap_state = 0
+led_states = [[1,0,0],[0,1,0],[0,0,1],[0,0,0]]
+
 
 def setup():
     GPIO.setmode(GPIO.BCM)
@@ -15,6 +17,8 @@ def loop():
         cap_state = GPIO.input(touch_pin)
         state = RememberState(cap_state)
         print(f"Cap Touch: {cap_state}, Count: {state}")
+        led_color = RGBLED()
+        print(led_color)
         sleep(.5)
 
 def RememberState(cap_read):
@@ -25,6 +29,19 @@ def RememberState(cap_read):
     if prev_cap_state == 1 and cap_read == 0:
         prev_cap_state = 0
     return count
+
+def RGBLED():
+    global count
+    if count == 0:
+        led = led_states[3]
+    if count <= len(led_states) and count != 0:
+        led = led_states[count-1]
+    if count >= len(led_states):
+        led = led_states[3]
+        count = 0
+    if count == 0:
+        led = led_states[3]
+    return led
 
 def destroy():
     GPIO.cleanup()
