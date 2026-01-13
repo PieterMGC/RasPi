@@ -1,8 +1,8 @@
-import RPi.GPIO as GPIO
+#import RPi.GPIO as GPIO
 import ADC0834
 from time import sleep
 
-GPIO.setmode(GPIO.BCM)
+#GPIO.setmode(GPIO.BCM)
 ADC0834.setup()
 
 try:
@@ -13,5 +13,5 @@ try:
 except KeyboardInterrupt:
     pass
 finally:
-    GPIO.cleanup()
+    #GPIO.cleanup()
     print("QUIT")

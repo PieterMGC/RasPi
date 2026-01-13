@@ -4,7 +4,7 @@ import math
 from gpiozero.pins.lgpio import LGPIOFactory
 
 factory = LGPIOFactory()
-servo = Servo(21, min_pulse_width = 0.5/1000, max_pulse_width = 2.5/1000,pin_factory=factory)
+servo = Servo(4, min_pulse_width = 0.5/1000, max_pulse_width = 2.5/1000,pin_factory=factory)
 
 while True:
     for i in range (0, 360):
