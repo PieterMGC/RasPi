@@ -8,6 +8,8 @@ try:
     while True:
         servo.angle = int(pot.value * 100)
 except KeyboardInterrupt:
+    servo.angle = 50
+    sleep(.5)
     servo.value = None  # release servo signal
     sleep(0.5)
     print("Program stopped!")

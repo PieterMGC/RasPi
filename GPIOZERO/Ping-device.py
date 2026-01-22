@@ -11,8 +11,8 @@ while True:
     if Anske_GSM.is_active:
         time = datetime.now()
         print(f"Ankse is home at {time}")
-        sleep(60)
+        sleep(1)
     else:
         time = datetime.now()
         print(f"Anske is not home at {time}")
-        sleep(60)
+        sleep(1)
