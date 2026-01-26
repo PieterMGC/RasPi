@@ -3,7 +3,7 @@ import time
 
 # GPIO mapping (BCM)
 STEER_PIN    = 22   # CH1
-THROTTLE_PIN = 27   # CH2
+THROTTLE_PIN = 23   # CH2
 
 CENTER_US = 1500
 SPAN_US   = 500
@@ -65,4 +65,4 @@ while True:
             flush=True
         )
 
-    time.sleep(0.1)
+    time.sleep(0.5)

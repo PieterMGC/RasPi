@@ -19,12 +19,12 @@ MOTOR_SPEED_REG = 0x82
 MOTOR_DIR_REG   = 0xAA
 
 # --- Devices ---
-# Option 3: force lgpio pin factory (no PWMSoftwareFallback)
+# force lgpio pin factory (no PWMSoftwareFallback)
 factory = LGPIOFactory()  
 
 steer_servo = Servo(
     SERVO_PIN,
-    min_pulse_width=0.0010, max_pulse_width=0.0020, #limit servo angle
+    min_pulse_width=0.0009, max_pulse_width=0.0021, #limit servo angle
     pin_factory=factory
 )
 
@@ -68,6 +68,7 @@ try:
 
             # --- Servo ---
             steer_servo.value = 0.0 if steer.norm is None else steer.norm
+            #print(steer_servo.value)
 
             # --- Motor ---
             apply_motor(thr.norm)
