@@ -1,16 +1,27 @@
 import lgpio
 import time
 
-PIN = 22  # BCM4
+PIN = 22  # BCM22
 
 h = lgpio.gpiochip_open(0)
-lgpio.gpio_claim_input(h, PIN, lgpio.SET_PULL_DOWN)
+
+# Claim als "alert" zodat edge events gegarandeerd binnenkomen
+lgpio.gpio_claim_alert(h, PIN, lgpio.BOTH_EDGES)
+
+rise = None
 
 def cb(chip, gpio, level, tick):
-    print("EDGE", level)
+    global rise
+    if level == 1:
+        rise = tick
+    elif level == 0 and rise is not None:
+        width_us = (tick - rise) / 1000.0
+        print(f"{width_us:.0f} us", flush=True)
+        rise = None
 
-lgpio.callback(h, PIN, lgpio.BOTH_EDGES, cb)
+# BELANGRIJK: bewaar het callback-object in een variabele
+c = lgpio.callback(h, PIN, lgpio.BOTH_EDGES, cb)
 
-print("Beweeg stuur/trigger...")
+print("Luisteren op GPIO22... beweeg stuur.", flush=True)
 while True:
     time.sleep(1)
