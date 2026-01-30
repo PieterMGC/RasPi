@@ -1,7 +1,7 @@
 from gpiozero import AngularServo
 from time import sleep
 
-servo = AngularServo(4, min_angle=0, max_angle=100)
+servo = AngularServo(21, min_angle=0, max_angle=100)
 
 while True:
     servo.angle = 0
