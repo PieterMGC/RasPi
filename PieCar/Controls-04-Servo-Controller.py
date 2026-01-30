@@ -3,7 +3,7 @@ from gpiozero import Servo
 from rc_pwm import RcPwmReader
 
 SERVO_PIN = 21  # BCM21 (werkt bij jou in testscript)
-SERVO = Servo(SERVO_PIN, min_pulse_width=0.0005, max_pulse_width=0.0025)
+SERVO = Servo(SERVO_PIN, min_pulse_width=0.0009, max_pulse_width=0.0021)
 
 with RcPwmReader({"steer": 22, "throttle": 27}, failsafe_s=0.25) as rx:
     while True:
